@@ -77,32 +77,35 @@ namespace Schedule
 
         private void saveButton_Click(object sender, EventArgs e)
         {
-            string executablePath = Application.ExecutablePath; // 실행 중인 애플리케이션 경로
-            string directoryPath = Path.GetDirectoryName(executablePath); // 실행 중인 애플리케이션의 디렉토리 경로
-            string filePath = Path.Combine(directoryPath, "Schedule.csv"); // 디렉토리 경로와 파일 이름을 결합하여 파일 경로 생성
+            //string executablePath = Application.ExecutablePath; // 실행 중인 애플리케이션 경로
+            //string directoryPath = Path.GetDirectoryName(executablePath); // 실행 중인 애플리케이션의 디렉토리 경로
+            //string filePath = Path.Combine(directoryPath, "Schedule.csv"); // 디렉토리 경로와 파일 이름을 결합하여 파일 경로 생성
 
 
-            // 데이터 그리드 뷰의 데이터 저장
-            StringBuilder sb = new StringBuilder();
+            //// 데이터 그리드 뷰의 데이터 저장
+            //StringBuilder sb = new StringBuilder();
 
-                // 헤더 쓰기
-                foreach (DataGridViewColumn column in dataGridView1.Columns)
-                {
-                    sb.Append(column.HeaderText).Append(",");
-                }
-                sb.AppendLine();
+            //    // 헤더 쓰기
+            //    foreach (DataGridViewColumn column in dataGridView1.Columns)
+            //    {
+            //        sb.Append(column.HeaderText).Append(",");
+            //    }
+            //    sb.AppendLine();
 
-                // 행 데이터 쓰기
-                foreach (DataGridViewRow row in dataGridView1.Rows)
-                {
-                    foreach (DataGridViewCell cell in row.Cells)
-                    {
-                        sb.Append(cell.Value).Append(",");
-                    }
-                    sb.AppendLine();
-                }
-                // 파일에 데이터 쓰기
-                System.IO.File.WriteAllText(filePath, sb.ToString());
+            //    // 행 데이터 쓰기
+            //    foreach (DataGridViewRow row in dataGridView1.Rows)
+            //    {
+            //        foreach (DataGridViewCell cell in row.Cells)
+            //        {
+            //            sb.Append(cell.Value).Append(",");
+            //        }
+            //        sb.AppendLine();
+            //    }
+            //    // 파일에 데이터 쓰기
+            //    System.IO.File.WriteAllText(filePath, sb.ToString());
+
+
+
         }
 
         private void Form1_Load(object sender, EventArgs e)
