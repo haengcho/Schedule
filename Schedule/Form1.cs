@@ -19,9 +19,34 @@ namespace Schedule
         {
             InitializeComponent();
 
-            
+            dataGridView1.CellClick += dataGridView1_CellClick;
 
-    }
+        }
+
+        private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex >= 0 && e.RowIndex < dataGridView1.Rows.Count)
+            {
+                DataGridViewRow selectedRow = dataGridView1.Rows[e.RowIndex];
+
+                // 선택된 행의 값을 각각의 컨트롤에 할당
+                selectedDate = DateTime.Parse(selectedRow.Cells[0].Value.ToString());
+                memoTextBox.Text = selectedRow.Cells[2].Value.ToString();
+                noteTextBox.Text = selectedRow.Cells[4].Value.ToString();
+
+                string importance = selectedRow.Cells[1].Value.ToString();
+                if (importance == "상")
+                    importanceButton1.Checked = true;
+                else if (importance == "중")
+                    importanceButton2.Checked = true;
+                else if (importance == "하")
+                    importanceButton3.Checked = true;
+
+                string comboBoxValue = selectedRow.Cells[3].Value.ToString();
+                if (metroComboBox1.Items.Contains(comboBoxValue))
+                    metroComboBox1.SelectedItem = comboBoxValue;
+            }
+        }
 
         private void plusButton_Click(object sender, EventArgs e)
         {
@@ -45,6 +70,35 @@ namespace Schedule
 
         private void modifyButton_Click(object sender, EventArgs e)
         {
+            if (dataGridView1.SelectedRows.Count > 0)
+            {
+                DataGridViewRow selectedRow = dataGridView1.SelectedRows[0];
+
+
+                // 수정된 값 가져오기
+                string modifiedSchedule = memoTextBox.Text;
+                string modifiedImportance = string.Empty;
+                string modifiedNote = noteTextBox.Text;
+
+                if (importanceButton1.Checked)
+                    modifiedImportance = "상";
+                else if (importanceButton2.Checked)
+                    modifiedImportance = "중";
+                else if (importanceButton3.Checked)
+                    modifiedImportance = "하";
+
+                // 선택된 행의 값을 수정된 값으로 변경
+                selectedRow.Cells[0].Value = selectedDate.ToShortDateString();
+                selectedRow.Cells[1].Value = modifiedImportance;
+                selectedRow.Cells[2].Value = modifiedSchedule;
+                selectedRow.Cells[3].Value = metroComboBox1.SelectedItem.ToString();
+                selectedRow.Cells[4].Value = modifiedNote;
+            }
+            else
+            {
+                // 선택된 행이 없을 경우에 대한 처리
+                MessageBox.Show("수정할 행을 선택해주세요.");
+            }
 
         }
 
@@ -77,32 +131,41 @@ namespace Schedule
 
         private void saveButton_Click(object sender, EventArgs e)
         {
-            //string executablePath = Application.ExecutablePath; // 실행 중인 애플리케이션 경로
-            //string directoryPath = Path.GetDirectoryName(executablePath); // 실행 중인 애플리케이션의 디렉토리 경로
-            //string filePath = Path.Combine(directoryPath, "Schedule.csv"); // 디렉토리 경로와 파일 이름을 결합하여 파일 경로 생성
+            string executablePath = Application.ExecutablePath; // 실행 중인 애플리케이션 경로
+            string directoryPath = Path.GetDirectoryName(executablePath); // 실행 중인 애플리케이션의 디렉토리 경로
+            string filePath = Path.Combine(directoryPath, "Schedule.csv"); // 디렉토리 경로와 파일 이름을 결합하여 파일 경로 생성
 
 
-            //// 데이터 그리드 뷰의 데이터 저장
-            //StringBuilder sb = new StringBuilder();
+            using (StreamWriter sw = new StreamWriter(filePath))
+            {
+                // 데이터 그리드 뷰의 각 행을 확인하며 저장
+                foreach (DataGridViewRow row in dataGridView1.Rows)
+                {
+                    // 행이 비어있는지 확인
+                    bool isEmptyRow = true;
+                    foreach (DataGridViewCell cell in row.Cells)
+                    {
+                        if (cell.Value != null && !string.IsNullOrEmpty(cell.Value.ToString()))
+                        {
+                            isEmptyRow = false;
+                            break;
+                        }
+                    }
 
-            //    // 헤더 쓰기
-            //    foreach (DataGridViewColumn column in dataGridView1.Columns)
-            //    {
-            //        sb.Append(column.HeaderText).Append(",");
-            //    }
-            //    sb.AppendLine();
+                    // 행이 비어있지 않다면 저장
+                    if (!isEmptyRow)
+                    {
+                        for (int i = 0; i < row.Cells.Count; i++)
+                        {
+                            sw.Write(row.Cells[i].Value);
 
-            //    // 행 데이터 쓰기
-            //    foreach (DataGridViewRow row in dataGridView1.Rows)
-            //    {
-            //        foreach (DataGridViewCell cell in row.Cells)
-            //        {
-            //            sb.Append(cell.Value).Append(",");
-            //        }
-            //        sb.AppendLine();
-            //    }
-            //    // 파일에 데이터 쓰기
-            //    System.IO.File.WriteAllText(filePath, sb.ToString());
+                            if (i != row.Cells.Count - 1)
+                                sw.Write(",");
+                        }
+                        sw.WriteLine();
+                    }
+                }
+            }
 
 
 
@@ -114,31 +177,32 @@ namespace Schedule
             string directoryPath = Path.GetDirectoryName(executablePath); // 실행 중인 애플리케이션의 디렉토리 경로
             string filePath = Path.Combine(directoryPath, "Schedule.csv"); // 디렉토리 경로와 파일 이름을 결합하여 파일 경로 생성
 
-            // 파일에서 데이터 읽어오기
-            string[] lines = File.ReadAllLines(filePath);
-
-            // 데이터 그리드 뷰 초기화
-            dataGridView1.Rows.Clear();
-            dataGridView1.Columns.Clear();
-
-            // 헤더 추가
-            string[] headers = lines[0].Split(',');
-            foreach (string header in headers)
+            if (File.Exists(filePath))
             {
-                dataGridView1.Columns.Add(header, header);
-            }
+                dataGridView1.Rows.Clear();
 
-            // 행 추가
-            for (int i = 1; i < lines.Length; i++)
-            {
-                string[] values = lines[i].Split(',');
-                dataGridView1.Rows.Add(values);
-            }
+                using (StreamReader sr = new StreamReader(filePath))
+                {
+                    string line;
+                    while ((line = sr.ReadLine()) != null)
+                    {
+                        string[] values = line.Split(',');
 
-            // 초기화 과정에서 첫 번째 행이 추가되는 문제 해결
-            if (dataGridView1.Rows.Count > 1)
-            {
-                dataGridView1.Rows.RemoveAt(0); // 초기화 과정에서 첫 번째 행을 제거
+                        // 비어있는 행은 건너뜀
+                        if (values.All(string.IsNullOrEmpty))
+                            continue;
+
+                        // 데이터 그리드 뷰에 행 추가
+                        int rowIndex = dataGridView1.Rows.Add();
+                        DataGridViewRow row = dataGridView1.Rows[rowIndex];
+
+                        // 각 셀에 값을 설정
+                        for (int i = 0; i < values.Length; i++)
+                        {
+                            row.Cells[i].Value = values[i];
+                        }
+                    }
+                }
             }
         }
     }
