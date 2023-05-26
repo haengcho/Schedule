@@ -35,14 +35,12 @@ namespace Schedule
                 importance = "중";
             else if (importanceButton3.Checked)
                 importance = "하";
+
             //그리드뷰에 기입한 변수 순서대로 삽입 됨
-            dataGridView1.Rows.Add(selectedDate.ToShortDateString(), importance, schedule, metroComboBox1.SelectedItem.ToString(), note);
-       
-
-
-
-
-
+            if (!string.IsNullOrEmpty(schedule)) // 스케줄이 유효한 경우에만 행 추가
+            {
+                dataGridView1.Rows.Add(selectedDate.ToShortDateString(), importance, schedule, metroComboBox1.SelectedItem.ToString(), note);
+            }
         }
 
         private void modifyButton_Click(object sender, EventArgs e)
@@ -103,10 +101,8 @@ namespace Schedule
                     }
                     sb.AppendLine();
                 }
-
                 // 파일에 데이터 쓰기
                 System.IO.File.WriteAllText(filePath, sb.ToString());
-
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -136,6 +132,11 @@ namespace Schedule
                 dataGridView1.Rows.Add(values);
             }
 
+            // 초기화 과정에서 첫 번째 행이 추가되는 문제 해결
+            if (dataGridView1.Rows.Count > 1)
+            {
+                dataGridView1.Rows.RemoveAt(0); // 초기화 과정에서 첫 번째 행을 제거
+            }
         }
     }
 }
